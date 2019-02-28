@@ -81,18 +81,14 @@ enum class BuildOS(
 
     Linux("Linux", setup = {
         matches(param = "teamcity.agent.jvm.os.name", value = ".*[Ll]inux.*")
-        exists(param = "docker")
-        matches(param = "system.agent.name", value = "^(default-.*|dotnet-linux(-clean)?(-admin)?-app-?\\d+-\\d+)$")
     }),
 
     Windows("Windows", setup = {
         matches(param = "teamcity.agent.jvm.os.name", value = ".*[wW]indows.*")
-        matches(param = "system.agent.name", value = "^(default-.*|dotnet-windows(-clean)?(-admin)?-app-?\\d+-\\d+)$")
     }),
 
     Mac("Mac", setup = {
         matches(param = "teamcity.agent.jvm.os.name", value = ".*OS.*X.*")
-        matches(param = "system.agent.name", value = "^(default-.*|dotnet-mac-unit-?\\d+-\\d+)$")
     }),
 
     ;
