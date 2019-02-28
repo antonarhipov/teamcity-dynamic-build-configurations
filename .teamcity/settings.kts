@@ -52,7 +52,7 @@ open class JdkAndOsBuildType(
         maven {
             goals = "clean package"
             mavenVersion = defaultProvidedVersion()
-            jdkHome = "%env.${jdk.jdkHome}%"
+            jdkHome = jdk.jdkHome
         }
     }
 })
