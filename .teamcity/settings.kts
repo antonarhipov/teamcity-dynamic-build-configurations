@@ -1,47 +1,39 @@
 import jetbrains.buildServer.configs.kotlin.v2018_2.*
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.maven
-
-/*
-The settings script is an entry point for defining a TeamCity
-project hierarchy. The script should contain a single call to the
-project() function with a Project instance or an init function as
-an argument.
-
-VcsRoots, BuildTypes, Templates, and subprojects can be
-registered inside the project using the vcsRoot(), buildType(),
-template(), and subProject() methods respectively.
-
-To debug settings scripts in command-line, run the
-
-    mvnDebug org.jetbrains.teamcity:teamcity-configs-maven-plugin:generate
-
-command and attach your debugger to the port 8000.
-
-To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
--> Tool Windows -> Maven Projects), find the generate task node
-(Plugins -> teamcity-configs -> teamcity-configs:generate), the
-'Debug' option is available in the context menu for the task.
-*/
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.script
 
 version = "2018.2"
 
-project {
+val operatingSystems = listOf("Mac OS X", "Windows", "Linux")
+val jdkVersions = listOf("JDK_18", "JDK_9", "JDK_10", "JDK_11")
 
-    buildType(Build)
+project {
+    for (os in operatingSystems) {
+        for (jdk in jdkVersions) {
+            buildType(Build(os, jdk))
+        }
+    }
 }
 
-object Build : BuildType({
-    name = "Build"
+class Build(val os: String, val jdk: String) : BuildType({
+    name = "Build_${os}_${jdk}"
+
+    vcs {
+        root(DslContext.settingsRoot)
+    }
 
     steps {
-        maven {
-            goals = "clean package"
-            mavenVersion = defaultProvidedVersion()
-            jdkHome = "%env.JDK_18%"
+//        maven {
+//            goals = "clean package"
+//            mavenVersion = defaultProvidedVersion()
+//            jdkHome = "%env.${jdk}%"
+//        }
+        script {
+            scriptContent = "echo $os, $jdk"
         }
     }
 
     requirements {
-        equals("teamcity.agent.jvm.os.name", "Mac OS X")
+        equals("teamcity.agent.jvm.os.name", os)
     }
 })
