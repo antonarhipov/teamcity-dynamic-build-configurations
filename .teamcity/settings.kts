@@ -8,13 +8,13 @@ val operatingSystems = listOf("Mac OS X", "Windows", "Linux")
 val jdkVersions = listOf("JDK_18", "JDK_11")
 
 project {
-//    for (os in operatingSystems) {
+    //    for (os in operatingSystems) {
 //        for (jdk in jdkVersions) {
 //            buildType(Build(os, jdk))
 //        }
 //    }
 
-    forEachJVMAndOS {os, jdk ->
+    forEachJVMAndOS { os, jdk ->
         build(os, jdk)
     }.forEach(this::buildType)
 }
@@ -29,7 +29,7 @@ class Build(val os: String, val jdk: String) : BuildType({
 })
 
 
-fun forEachJVMAndOS(a : (BuildOS, JdkVersion) -> BuildType?) : List<BuildType> {
+fun forEachJVMAndOS(a: (BuildOS, JdkVersion) -> BuildType?): List<BuildType> {
     return JdkVersion.values().flatMap { jdk ->
         BuildOS.values().mapNotNull { os ->
             a(os, jdk)
@@ -40,7 +40,9 @@ fun forEachJVMAndOS(a : (BuildOS, JdkVersion) -> BuildType?) : List<BuildType> {
 open class JdkAndOsBuildType(
     val os: BuildOS,
     val jdk: JdkVersion
-) : BuildType({
+) : BuildType( {
+    id("Build_${os.caption}_${jdk.caption}".toExtId())
+    name = "Build (${os.caption}, ${jdk.caption})"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -53,24 +55,12 @@ open class JdkAndOsBuildType(
             jdkHome = "%env.${jdk.jdkHome}%"
         }
     }
-
 })
 
 fun build(
     os: BuildOS,
     jdk: JdkVersion
 ) = JdkAndOsBuildType(os, jdk).apply {
-    id("Build_${os.caption}_${jdk.caption}".toExtId())
-    name = "Build (${os.caption}, ${jdk.caption})"
-
-    steps {
-        maven {
-            goals = "clean package"
-            mavenVersion = defaultProvidedVersion()
-            jdkHome = "%env.${jdk.jdkHome}%"
-        }
-    }
-
     os(this)
 }
 
@@ -104,9 +94,9 @@ enum class BuildOS(
     }
 }
 
-enum class JdkVersion(teamcityProperty : String) {
-    JDK_8(teamcityProperty = "env.JDK_18_x64"),
-    JDK_11(teamcityProperty = "env.JDK_11_x64");
+enum class JdkVersion(teamcityProperty: String) {
+    JDK_8("env.JDK_18_x64"),
+    JDK_11("env.JDK_11_x64");
 
     val suffix = "_" + name.toLowerCase()
     val caption = name.toLowerCase().replace("_", "")
