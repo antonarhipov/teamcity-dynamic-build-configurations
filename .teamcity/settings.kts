@@ -1,3 +1,4 @@
+import jetbrains.buildServer.configs.kotlin.v10.toExtId
 import jetbrains.buildServer.configs.kotlin.v2018_2.*
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.script
@@ -5,7 +6,7 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.script
 version = "2018.2"
 
 val operatingSystems = listOf("Mac OS X", "Windows", "Linux")
-val jdkVersions = listOf("JDK_18", "JDK_9", "JDK_10", "JDK_11")
+val jdkVersions = listOf("JDK_18", "JDK_11")
 
 project {
     for (os in operatingSystems) {
@@ -16,7 +17,7 @@ project {
 }
 
 class Build(val os: String, val jdk: String) : BuildType({
-    id("Build_${os}_${jdk}".replace(" ", "_"))
+    id("Build_${os}_${jdk}".toExtId())
     name = "Build ($os, $jdk)"
 
     vcs {
