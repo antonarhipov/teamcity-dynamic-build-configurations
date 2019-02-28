@@ -17,7 +17,7 @@ project {
 
 class Build(val os: String, val jdk: String) : BuildType({
     id("Build_${os}_${jdk}".replace(" ", "_"))
-    name = "Build_${os}_${jdk}"
+    name = "Build ($os, $jdk)"
 
     vcs {
         root(DslContext.settingsRoot)
