@@ -51,6 +51,8 @@ fun build(
             jdkHome = jdk.jdkHome
         }
     }
+
+    os(this)
 }
 
 enum class BuildOS(
