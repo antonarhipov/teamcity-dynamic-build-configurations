@@ -4,29 +4,25 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.maven
 
 version = "2018.2"
 
-val operatingSystems = listOf("Mac OS X", "Windows", "Linux")
-val jdkVersions = listOf("JDK_18", "JDK_11")
+//region simple stuff
+//val operatingSystems = listOf("Mac OS X", "Windows", "Linux")
+//val jdkVersions = listOf("JDK_18", "JDK_11")
+//
+//class Build(val os: String, val jdk: String) : BuildType({
+//    id("Build_${os}_${jdk}".toExtId())
+//    name = "Build ($os, $jdk)"
+//
+//    vcs {
+//        root(DslContext.settingsRoot)
+//    }
+//})
+//endregion
 
 project {
-    //    for (os in operatingSystems) {
-//        for (jdk in jdkVersions) {
-//            buildType(Build(os, jdk))
-//        }
-//    }
-
     forEachJVMAndOS { os, jdk ->
         build(os, jdk)
     }.forEach(this::buildType)
 }
-
-class Build(val os: String, val jdk: String) : BuildType({
-    id("Build_${os}_${jdk}".toExtId())
-    name = "Build ($os, $jdk)"
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-})
 
 
 fun forEachJVMAndOS(a: (BuildOS, JdkVersion) -> BuildType?): List<BuildType> {
@@ -37,10 +33,10 @@ fun forEachJVMAndOS(a: (BuildOS, JdkVersion) -> BuildType?): List<BuildType> {
     }
 }
 
-open class JdkAndOsBuildType(
-    val os: BuildOS,
-    val jdk: JdkVersion
-) : BuildType( {
+fun build(
+    os: BuildOS,
+    jdk: JdkVersion
+) = BuildType {
     id("Build_${os.caption}_${jdk.caption}".toExtId())
     name = "Build (${os.caption}, ${jdk.caption})"
 
@@ -55,19 +51,12 @@ open class JdkAndOsBuildType(
             jdkHome = jdk.jdkHome
         }
     }
-})
-
-fun build(
-    os: BuildOS,
-    jdk: JdkVersion
-) = JdkAndOsBuildType(os, jdk).apply {
-    os(this)
 }
 
 enum class BuildOS(
     val caption: String,
     setup: Requirements.() -> Unit
-) : (JdkAndOsBuildType) -> Unit {
+) : (BuildType) -> Unit {
 
     Linux("Linux", setup = {
         matches(param = "teamcity.agent.jvm.os.name", value = ".*[Ll]inux.*")
@@ -83,11 +72,9 @@ enum class BuildOS(
 
     ;
 
-    override fun invoke(buildType: JdkAndOsBuildType) {
+    override fun invoke(buildType: BuildType) {
         buildType.requirements(requirements)
     }
-
-//    val suffix = "_" + caption.toLowerCase()
 
     val requirements: Requirements.() -> Unit = {
         setup()
@@ -98,7 +85,6 @@ enum class JdkVersion(teamcityProperty: String) {
     JDK_8("env.JDK_18_x64"),
     JDK_11("env.JDK_11_x64");
 
-    val suffix = "_" + name.toLowerCase()
     val caption = name.toLowerCase().replace("_", "")
 
     val jdkHome = "%$teamcityProperty%"
